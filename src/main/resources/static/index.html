@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>티켓팅의 신</title>
+
+    <style>
+
+        body { font-family: 'Arial', sans-serif; text-align: center; padding: 50px; }
+
+        .container { border: 2px solid #333; padding: 20px; border-radius: 10px; display: inline-block; }
+
+        button { background-color: #ff4757; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 10px;}
+
+        button:hover { background-color: #ff6b81; }
+
+        #result { margin-top: 20px; font-weight: bold; }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🎫 아이유 콘서트 예매</h1>
+
+    <p>남은 수량: 서버(Redis)만이 알고 있다...</p>
+
+
+
+    <label>사용자 ID: </label>
+
+    <input type="number" id="userId" value="1" placeholder="ID 입력">
+
+    <br>
+
+    <button onclick="buyTicket()">예매하기 (광클 금지)</button>
+
+
+
+    <div id="result"></div>
+
+</div>
+
+
+
+<script>
+
+    async function buyTicket() {
+
+        const userId = document.getElementById('userId').value;
+
+        const resultDiv = document.getElementById('result');
+
+
+
+        // 아까 우리가 정한 API 명세대로 요청!
+
+        try {
+
+            const response = await fetch('http://localhost:8080/ticketing', {
+
+                method: 'POST',
+
+                headers: {
+
+                    'Content-Type': 'application/json',
+
+                },
+
+                body: JSON.stringify({
+
+                    userId: parseInt(userId),
+
+                    concertId: 1 // 1번 공연 고정
+
+                })
+
+            });
+
+
+
+            if (response.ok) {
+
+                const data = await response.json(); // 성공 시 Ticket ID 받음
+
+                resultDiv.innerHTML = `<span style="color:green">🎉 성공! 티켓 번호: ${data}</span>`;
+
+            } else {
+
+                // 500 에러나 400 에러가 오면 매진으로 간주
+
+                const errorText = await response.text();
+
+                resultDiv.innerHTML = `<span style="color:red">😭 실패: 매진되었습니다 (또는 에러)</span>`;
+
+            }
+
+        } catch (error) {
+
+            console.error('Error:', error);
+
+            resultDiv.innerHTML = `<span style="color:red">서버 연결 실패!</span>`;
+
+        }
+
+    }
+
+</script>
+
+</body>
+
+</html>
