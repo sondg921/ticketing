@@ -1,5 +1,6 @@
 package com.example.ticketing.service;
 
+import com.example.ticketing.dto.TicketingResponse;
 import com.example.ticketing.entity.ConcertInfo;
 import com.example.ticketing.entity.Payment;
 import com.example.ticketing.repository.ConcertInfoRepository;
@@ -7,7 +8,6 @@ import com.example.ticketing.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -17,7 +17,7 @@ public class TicketingService {
     private final RedisTemplate<String, String> redisTemplate;
 
     //@Transactional  // 전체 트랜잭션을 걸면 Redis랑 섞여서 오히려 성능 저하될 수 있음. 저장할 때만 걸거나 범위를 조정.
-    public Long issueTicket(Long userId, Long concertId) {
+    public TicketingResponse issueTicket(Long userId, Long concertId) {
         String redisKey = "concert_stock:" + concertId;
 
         // 1. ⚡ Redis에서 재고 감소 (DECR 명령어)
@@ -38,7 +38,13 @@ public class TicketingService {
         ConcertInfo concert = concertInfoRepository.findById(concertId)
                 .orElseThrow(() -> new RuntimeException("공연 정보 없음"));
 
+        // 4. 순번 계산
+        Long rank = concert.getTotalStock() - stock;
+
+        // 5. 결제 저장
         Payment payment = new Payment(userId, concert);
-        return paymentRepository.save(payment).getId();
+        Long ticketId = paymentRepository.save(payment).getId();
+
+        return new TicketingResponse(ticketId, rank);
     }
 }

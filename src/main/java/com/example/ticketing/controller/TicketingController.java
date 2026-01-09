@@ -1,5 +1,6 @@
 package com.example.ticketing.controller;
 
+import com.example.ticketing.dto.TicketingResponse;
 import com.example.ticketing.service.TicketingService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,7 @@ public class TicketingController {
     private final TicketingService ticketingService;
 
     @PostMapping("/ticketing")
-    public Long issueTicket(@RequestBody TicketingRequest request){
+    public TicketingResponse issueTicket(@RequestBody TicketingRequest request){
         return ticketingService.issueTicket(request.getUserId(), request.getConcertId());
     }
 

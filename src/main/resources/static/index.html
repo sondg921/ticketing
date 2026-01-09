@@ -90,7 +90,7 @@
 
                 const data = await response.json(); // 성공 시 Ticket ID 받음
 
-                resultDiv.innerHTML = `<span style="color:green">🎉 성공! 티켓 번호: ${data}</span>`;
+                resultDiv.innerHTML = `<span style="color:green">🎉 성공! 대기 순번: ${data.rank}번 (티켓: ${data.ticketId})</span>`;
 
             } else {
 
